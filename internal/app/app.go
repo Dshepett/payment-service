@@ -1,22 +1,26 @@
 package app
 
 import (
+	"log"
+	"net/http"
+	"time"
+
 	"github.com/Dshepett/payment-service/internal/config"
 	"github.com/Dshepett/payment-service/internal/service"
 	"github.com/gorilla/mux"
-	"log"
-	"net/http"
 )
 
 type App struct {
 	service *service.Service
 	router  *mux.Router
+	config  *config.Config
 }
 
 func New(config *config.Config) *App {
 	app := &App{
-		service: nil,
+		service: service.New(config),
 		router:  mux.NewRouter(),
+		config:  config,
 	}
 	app.addRoutes()
 	return app
@@ -24,10 +28,11 @@ func New(config *config.Config) *App {
 
 func (a *App) Run() {
 	s := &http.Server{
-		Addr:         "127.0.0.1:8080",
+		Addr:         ":" + a.config.Port,
 		Handler:      a.router,
-		ReadTimeout:  0,
-		WriteTimeout: 0,
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 15 * time.Second,
 	}
+	a.service.Start()
 	log.Fatal(s.ListenAndServe())
 }
