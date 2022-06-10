@@ -11,10 +11,14 @@ import (
 
 // @title           Payment Service APi
 // @version         1.0
-// @description     This is a sample server celler server.
+// @description   	Simple api for handling payments.
 
 // @host      localhost:8080
 // @BasePath  /
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 
 func main() {
 	conf := config.New()

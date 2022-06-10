@@ -13,8 +13,9 @@ import (
 )
 
 func (a *App) addRoutes() {
+	a.router.HandleFunc("/auth/login", a.logInHandler).Methods("POST")
 	a.router.HandleFunc("/payments/new", a.newPaymentHandler).Methods("POST")
-	a.router.HandleFunc("/payments/{id:[0-9]+}/change", a.changePaymentStatusHandler).Methods("POST")
+	a.router.HandleFunc("/payments/{id:[0-9]+}/change", a.authValidation(a.changePaymentStatusHandler)).Methods("POST")
 	a.router.HandleFunc("/payments/{id:[0-9]+}/status", a.paymentStatusHandler).Methods("GET")
 	a.router.HandleFunc("/payments/user/{id:[0-9]+}", a.paymentsByIdHandler).Methods("GET")
 	a.router.HandleFunc("/payments/user/email/{email}", a.paymentsByEmailHandler).Methods("GET")
@@ -27,8 +28,31 @@ func (a *App) addRoutes() {
 	)).Methods(http.MethodGet)
 }
 
+// @Summary SignIn
+// @Tags auth
+// @Description Use this route to get authorization token that will be needed to change payment's status( Add "Bearer + (token)" in ApiKeyAuth).
+// @Accept  json
+// @Produce  json
+// @Param input body models.LogInRequest true "userdata"
+// @Success 200 {object} models.LoginResponse "token"
+// @Failure 400 {object} models.ErrorResponse
+// @Router /auth/login [post]
+func (a *App) logInHandler(w http.ResponseWriter, r *http.Request) {
+	var requestData models.LogInRequest
+	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
+		responder.RespondWithError(w, http.StatusBadRequest, "incorrect data")
+		return
+	}
+	token, err := a.service.GenerateToken(requestData.Username, requestData.Password)
+	if err != nil {
+		responder.RespondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	responder.RespondWithJson(w, http.StatusOK, models.LoginResponse{Token: token})
+}
+
 // @Summary      Create new payment
-// @Description  Write description!!!
+// @Description  Create new payment from request's body.
 // @Tags         Payments
 // @Accept       json
 // @Produce      json
@@ -56,11 +80,12 @@ func (a *App) newPaymentHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary      Change payment's status
-// @Description  Write description!!!
+// @Security     ApiKeyAuth
+// @Description  Allows to change status if current status is NEW on SUCCESS OR FAILURE. Authorize first!!!!!!!!!!!!!
 // @Tags         Payments
 // @Accept       json
 // @Produce      json
-// @Param        id path int true "Payment ID"
+// @Param        id path int true "Payment ID" example(50)
 // @Param        input body models.ChangeStatusRequest true "status name"
 // @Success      200
 // @Failure      400 {object} models.ErrorResponse
@@ -84,11 +109,11 @@ func (a *App) changePaymentStatusHandler(w http.ResponseWriter, r *http.Request)
 }
 
 // @Summary      Returns payment's status
-// @Description  Write description!!!
+// @Description  return payment's status if payment exists else returns error message.
 // @Tags         Payments
 // @Accept       json
 // @Produce      json
-// @Param        id path int true "Payment ID"
+// @Param        id path int true "Payment ID" example(50)
 // @Success      200 {object} models.PaymentStatusResponse
 // @Failure      400 {object} models.ErrorResponse
 // @Router       /payments/{id}/status [get]
@@ -107,11 +132,11 @@ func (a *App) paymentStatusHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary      Returns all payments with chosen user ID
-// @Description  Write description!!!
+// @Description  Returns all payments with chosen user ID.
 // @Tags         Payments
 // @Accept       json
 // @Produce      json
-// @Param        id path int true "User ID"
+// @Param        id path int true "User ID" example(50)
 // @Success      200 {object} models.PaymentsResponse
 // @Failure      400 {object} models.ErrorResponse
 // @Router       /payments/user/{id} [get]
@@ -130,7 +155,7 @@ func (a *App) paymentsByIdHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary      Returns all payments with chosen user email
-// @Description  Write description!!!
+// @Description  Returns all payments with chosen user email.
 // @Tags         Payments
 // @Accept       json
 // @Produce      json
@@ -149,11 +174,11 @@ func (a *App) paymentsByEmailHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary      Deny payment if it is possible
-// @Description  Write description!!!
+// @Description  Deny payment if it exists and its status equals NEW or ERROR.
 // @Tags         Payments
 // @Accept       json
 // @Produce      json
-// @Param        id path int true "Payment ID"
+// @Param        id path int true "Payment ID" example(50)
 // @Success      200
 // @Failure      400 {object} models.ErrorResponse
 // @Router       /payments/{id}/deny [delete]

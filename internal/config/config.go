@@ -7,9 +7,11 @@ import (
 )
 
 type Config struct {
-	DBUser     string
-	DBName     string
-	DBPassword string
+	DBUser        string
+	DBName        string
+	DBPassword    string
+	AdminUsername string
+	AdminPassword string
 }
 
 func New() *Config {
@@ -18,8 +20,10 @@ func New() *Config {
 		log.Fatal(err)
 	}
 	return &Config{
-		DBUser:     viper.GetString("DBUSER"),
-		DBPassword: viper.GetString("DBPASSWORD"),
-		DBName:     viper.GetString("DBNAME"),
+		DBUser:        viper.GetString("DBUSER"),
+		DBPassword:    viper.GetString("DBPASSWORD"),
+		DBName:        viper.GetString("DBNAME"),
+		AdminUsername: viper.GetString("ADMINNAME"),
+		AdminPassword: viper.GetString("ADMINPASSWORD"),
 	}
 }

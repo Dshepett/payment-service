@@ -3,11 +3,11 @@ module github.com/Dshepett/payment-service
 go 1.18
 
 require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gorilla/mux v1.8.0
 	github.com/lib/pq v1.10.6
 	github.com/spf13/viper v1.12.0
 	github.com/swaggo/http-swagger v1.2.8
-	github.com/swaggo/http-swagger/example/gorilla v0.0.0-20220525054736-344651683f31
 	github.com/swaggo/swag v1.8.2
 )
 

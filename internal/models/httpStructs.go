@@ -7,6 +7,15 @@ type NewPaymentRequest struct {
 	Currency  string `json:"currency" example:"RUB"`
 }
 
+type LogInRequest struct {
+	Username string `json:"username" example:"master_of_puppets"`
+	Password string `json:"password" example:"123456789"`
+}
+
+type LoginResponse struct {
+	Token string `json:"token"`
+}
+
 type NewPaymentResponse struct {
 	Payment Payment `json:"payment"`
 }

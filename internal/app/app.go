@@ -23,6 +23,7 @@ func New(config *config.Config) *App {
 		router:  mux.NewRouter(),
 	}
 	app.addRoutes()
+	app.addMiddlewares()
 	log.Println("app created")
 	return app
 }

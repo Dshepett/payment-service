@@ -9,14 +9,29 @@ import (
 	"github.com/Dshepett/payment-service/internal/config"
 	"github.com/Dshepett/payment-service/internal/models"
 	"github.com/Dshepett/payment-service/internal/storage"
+	"github.com/Dshepett/payment-service/internal/storage/postgres"
+	"github.com/dgrijalva/jwt-go"
 )
 
 type Service struct {
-	storage *storage.Storage
+	storage       storage.Storage
+	adminUsername string
+	adminPassword string
 }
 
+type tokenClaims struct {
+	jwt.StandardClaims
+	Username string `json:"username"`
+}
+
+var signInKey = "qrkjk#4#%35FSFJlja#4353KSFjH"
+
 func New(config *config.Config) *Service {
-	return &Service{storage: storage.New(config)}
+	return &Service{
+		storage:       postgres.NewStorage(config),
+		adminPassword: config.AdminPassword,
+		adminUsername: config.AdminUsername,
+	}
 }
 
 func (s *Service) Start() {
@@ -26,10 +41,45 @@ func (s *Service) Start() {
 	}
 }
 
+func (s *Service) GenerateToken(username, password string) (string, error) {
+
+	if username != s.adminUsername || password != s.adminPassword {
+		return "", errors.New("incorrect username or password")
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &tokenClaims{
+		jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(12 * time.Hour).Unix(),
+			IssuedAt:  time.Now().Unix(),
+		},
+		username,
+	})
+	return token.SignedString([]byte(signInKey))
+}
+
+func (s *Service) ParseToken(accessToken string) (string, error) {
+	token, err := jwt.ParseWithClaims(accessToken, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("invalid signing method")
+		}
+
+		return []byte(signInKey), nil
+	})
+	if err != nil {
+		return "", err
+	}
+
+	claims, ok := token.Claims.(*tokenClaims)
+	if !ok {
+		return "", errors.New("token claims are not of type *tokenClaims")
+	}
+
+	return claims.Username, nil
+}
+
 func (s *Service) AddPayment(payment *models.Payment) error {
 	payment.CreatedAt = time.Now()
 	payment.UpdatedAt = time.Now()
-	if rand.ExpFloat64() > 0.5 {
+	if rand.Float64() < 0.2 {
 		payment.Status = models.Error
 	}
 	err := s.storage.Payment().AddPayment(payment)

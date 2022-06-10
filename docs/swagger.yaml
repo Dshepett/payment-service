@@ -12,6 +12,20 @@ definitions:
         example: incorrect user ID
         type: string
     type: object
+  models.LogInRequest:
+    properties:
+      password:
+        example: "123456789"
+        type: string
+      username:
+        example: master_of_puppets
+        type: string
+    type: object
+  models.LoginResponse:
+    properties:
+      token:
+        type: string
+    type: object
   models.NewPaymentRequest:
     properties:
       amount:
@@ -75,17 +89,46 @@ definitions:
 host: localhost:8080
 info:
   contact: {}
-  description: This is a sample server celler server.
+  description: Simple api for handling payments.
   title: Payment Service APi
   version: "1.0"
 paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Use this route to get authorization token that will be needed to
+        change payment's status( Add "Bearer + (token)" in ApiKeyAuth).
+      parameters:
+      - description: userdata
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.LogInRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: token
+          schema:
+            $ref: '#/definitions/models.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: SignIn
+      tags:
+      - auth
   /payments/{id}/change:
     post:
       consumes:
       - application/json
-      description: Write description!!!
+      description: Allows to change status if current status is NEW on SUCCESS OR
+        FAILURE. Authorize first!!!!!!!!!!!!!
       parameters:
       - description: Payment ID
+        example: 50
         in: path
         name: id
         required: true
@@ -105,6 +148,8 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Change payment's status
       tags:
       - Payments
@@ -112,9 +157,10 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Write description!!!
+      description: Deny payment if it exists and its status equals NEW or ERROR.
       parameters:
       - description: Payment ID
+        example: 50
         in: path
         name: id
         required: true
@@ -135,9 +181,10 @@ paths:
     get:
       consumes:
       - application/json
-      description: Write description!!!
+      description: return payment's status if payment exists else returns error message.
       parameters:
       - description: Payment ID
+        example: 50
         in: path
         name: id
         required: true
@@ -160,7 +207,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Write description!!!
+      description: Create new payment from request's body.
       parameters:
       - description: payment info
         in: body
@@ -186,9 +233,10 @@ paths:
     get:
       consumes:
       - application/json
-      description: Write description!!!
+      description: Returns all payments with chosen user ID.
       parameters:
       - description: User ID
+        example: 50
         in: path
         name: id
         required: true
@@ -211,7 +259,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Write description!!!
+      description: Returns all payments with chosen user email.
       parameters:
       - description: User email
         example: user@gmail.com
@@ -233,4 +281,9 @@ paths:
       summary: Returns all payments with chosen user email
       tags:
       - Payments
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

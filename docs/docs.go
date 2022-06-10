@@ -16,9 +16,49 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth/login": {
+            "post": {
+                "description": "Use this route to get authorization token that will be needed to change payment's status( Add \"Bearer + (token)\" in ApiKeyAuth).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "SignIn",
+                "parameters": [
+                    {
+                        "description": "userdata",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.LogInRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "token",
+                        "schema": {
+                            "$ref": "#/definitions/models.LoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/payments/new": {
             "post": {
-                "description": "Write description!!!",
+                "description": "Create new payment from request's body.",
                 "consumes": [
                     "application/json"
                 ],
@@ -58,7 +98,7 @@ const docTemplate = `{
         },
         "/payments/user/email/{email}": {
             "get": {
-                "description": "Write description!!!",
+                "description": "Returns all payments with chosen user email.",
                 "consumes": [
                     "application/json"
                 ],
@@ -97,7 +137,7 @@ const docTemplate = `{
         },
         "/payments/user/{id}": {
             "get": {
-                "description": "Write description!!!",
+                "description": "Returns all payments with chosen user ID.",
                 "consumes": [
                     "application/json"
                 ],
@@ -111,6 +151,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "example": 50,
                         "description": "User ID",
                         "name": "id",
                         "in": "path",
@@ -135,7 +176,12 @@ const docTemplate = `{
         },
         "/payments/{id}/change": {
             "post": {
-                "description": "Write description!!!",
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Allows to change status if current status is NEW on SUCCESS OR FAILURE. Authorize first!!!!!!!!!!!!!",
                 "consumes": [
                     "application/json"
                 ],
@@ -149,6 +195,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "example": 50,
                         "description": "Payment ID",
                         "name": "id",
                         "in": "path",
@@ -179,7 +226,7 @@ const docTemplate = `{
         },
         "/payments/{id}/deny": {
             "delete": {
-                "description": "Write description!!!",
+                "description": "Deny payment if it exists and its status equals NEW or ERROR.",
                 "consumes": [
                     "application/json"
                 ],
@@ -193,6 +240,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "example": 50,
                         "description": "Payment ID",
                         "name": "id",
                         "in": "path",
@@ -214,7 +262,7 @@ const docTemplate = `{
         },
         "/payments/{id}/status": {
             "get": {
-                "description": "Write description!!!",
+                "description": "return payment's status if payment exists else returns error message.",
                 "consumes": [
                     "application/json"
                 ],
@@ -228,6 +276,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "example": 50,
                         "description": "Payment ID",
                         "name": "id",
                         "in": "path",
@@ -267,6 +316,27 @@ const docTemplate = `{
                 "error": {
                     "type": "string",
                     "example": "incorrect user ID"
+                }
+            }
+        },
+        "models.LogInRequest": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "example": "123456789"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "master_of_puppets"
+                }
+            }
+        },
+        "models.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
                 }
             }
         },
@@ -356,6 +426,13 @@ const docTemplate = `{
                 }
             }
         }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
     }
 }`
 
@@ -366,7 +443,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Payment Service APi",
-	Description:      "This is a sample server celler server.",
+	Description:      "Simple api for handling payments.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }

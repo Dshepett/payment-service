@@ -26,8 +26,8 @@ func (p *PgPaymentRepository) AddPayment(payment *models.Payment) error {
 }
 
 func (p *PgPaymentRepository) UpdatePaymentStatus(payment *models.Payment) error {
-	query := "UPDATE payments SET status = $1 WHERE id = $2;"
-	_, err := p.db.Exec(query, payment.Status, payment.Id)
+	query := "UPDATE payments SET status = $1, updated_at=$2 WHERE id = $3;"
+	_, err := p.db.Exec(query, payment.Status, payment.UpdatedAt, payment.Id)
 	return err
 }
 
