@@ -2,7 +2,6 @@ package models
 
 import (
 	"net/mail"
-	"strconv"
 	"time"
 )
 
@@ -14,33 +13,31 @@ var (
 )
 
 type Payment struct {
-	Id        int       `json:"id"`
-	UserId    int       `json:"user_id"`
-	UserEmail string    `json:"user_email"`
-	Amount    int       `json:"amount"`
-	Currency  string    `json:"currency"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Status    string    `json:"status"`
+	Id        int       `json:"id" example:"35"`
+	UserId    int       `json:"user_id" example:"31"`
+	UserEmail string    `json:"user_email" example:"user@gmail.com"`
+	Amount    int       `json:"amount" example:"3456"`
+	Currency  string    `json:"currency" example:"MDA"`
+	CreatedAt time.Time `json:"created_at" example:"2022-06-09T14:48:12.288326+03:00"`
+	UpdatedAt time.Time `json:"updated_at" example:"2022-06-09T14:48:12.288326+03:00"`
+	Status    string    `json:"status" example:"NEW"`
 }
 
-func CreatePayment(userId string, userEmail string, amount string, currency string) *Payment {
-	id, err := strconv.Atoi(userId)
-	if err != nil || id < 0 {
+func CreatePayment(request NewPaymentRequest) *Payment {
+	if request.UserId < 0 {
 		return nil
 	}
-	amountInt, err := strconv.Atoi(amount)
-	if err != nil || amountInt < 0 {
+	if request.Amount < 0 {
 		return nil
 	}
-	if _, err = mail.ParseAddress(userEmail); err != nil {
+	if _, err := mail.ParseAddress(request.UserEmail); err != nil {
 		return nil
 	}
 	return &Payment{
-		UserId:    id,
-		UserEmail: userEmail,
-		Amount:    amountInt,
-		Currency:  currency,
+		UserId:    request.UserId,
+		UserEmail: request.UserEmail,
+		Amount:    request.Amount,
+		Currency:  request.Currency,
 		Status:    New,
 	}
 }

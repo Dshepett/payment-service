@@ -3,6 +3,8 @@ package responder
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/Dshepett/payment-service/internal/models"
 )
 
 func RespondWithJson(w http.ResponseWriter, code int, data interface{}) {
@@ -13,5 +15,5 @@ func RespondWithJson(w http.ResponseWriter, code int, data interface{}) {
 }
 
 func RespondWithError(w http.ResponseWriter, code int, message string) {
-	RespondWithJson(w, code, map[string]string{"error": message})
+	RespondWithJson(w, code, models.ErrorResponse{Message: message})
 }

@@ -9,4 +9,5 @@ type PaymentRepository interface {
 	GetPaymentsByUserId(id int) ([]models.Payment, error)
 	GetPaymentsByUserEmail(email string) ([]models.Payment, error)
 	DeletePaymentById(id int) error
+	Close() error
 }

@@ -10,7 +10,6 @@ type Config struct {
 	DBUser     string
 	DBName     string
 	DBPassword string
-	Port       string
 }
 
 func New() *Config {
@@ -22,6 +21,5 @@ func New() *Config {
 		DBUser:     viper.GetString("DBUSER"),
 		DBPassword: viper.GetString("DBPASSWORD"),
 		DBName:     viper.GetString("DBNAME"),
-		Port:       viper.GetString("PORT"),
 	}
 }

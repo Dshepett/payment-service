@@ -87,3 +87,7 @@ func (p *PgPaymentRepository) DeletePaymentById(id int) error {
 	_, err := p.db.Exec(query, id)
 	return err
 }
+
+func (p *PgPaymentRepository) Close() error {
+	return p.db.Close()
+}

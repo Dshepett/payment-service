@@ -48,6 +48,7 @@ func (s *Service) ChangePaymentStatus(id int, status string) error {
 		return errors.New("status could not be changed")
 	}
 	payment.Status = status
+	payment.UpdatedAt = time.Now()
 	err = s.storage.Payment().UpdatePaymentStatus(payment)
 	if err != nil {
 		return errors.New("error occurred during changing status")
@@ -56,7 +57,6 @@ func (s *Service) ChangePaymentStatus(id int, status string) error {
 }
 
 func (s *Service) PaymentStatus(id int) (string, error) {
-
 	if payment, err := s.storage.Payment().GetPayment(id); err != nil {
 		return "", errors.New("payment with such id does not exist")
 	} else {
@@ -93,4 +93,8 @@ func (s *Service) DenyPayment(id int) error {
 		return errors.New("error occurred during denying this payment")
 	}
 	return nil
+}
+
+func (s *Service) Close() error {
+	return s.storage.Close()
 }
