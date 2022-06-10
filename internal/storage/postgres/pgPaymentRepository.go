@@ -11,7 +11,7 @@ type PgPaymentRepository struct {
 	db *sql.DB
 }
 
-func NewPaymentRepository(db *sql.DB) *PgPaymentRepository {
+func PaymentRepository(db *sql.DB) *PgPaymentRepository {
 	return &PgPaymentRepository{
 		db: db,
 	}

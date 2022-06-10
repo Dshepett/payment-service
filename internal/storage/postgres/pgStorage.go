@@ -26,7 +26,7 @@ func (s *PgStorage) Open() error {
 	if err != nil {
 		return err
 	}
-	s.paymentRepository = NewPaymentRepository(db)
+	s.paymentRepository = PaymentRepository(db)
 	log.Println("success connecting to database")
 	return nil
 }

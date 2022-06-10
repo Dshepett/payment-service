@@ -33,6 +33,9 @@ func CreatePayment(request NewPaymentRequest) *Payment {
 	if _, err := mail.ParseAddress(request.UserEmail); err != nil {
 		return nil
 	}
+	if request.Currency == "" {
+		return nil
+	}
 	return &Payment{
 		UserId:    request.UserId,
 		UserEmail: request.UserEmail,
