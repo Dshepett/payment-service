@@ -59,20 +59,6 @@ func (p *PaymentRepository) GetPaymentsByUserEmail(email string) ([]models.Payme
 	return payments, nil
 }
 
-func (p *PaymentRepository) DeletePaymentById(id int) error {
-	position := -1
-	for pos, val := range p.Payments {
-		if val.Id == id {
-			position = pos
-		}
-	}
-	if position == -1 {
-		return errors.New("payment with such id does not exist")
-	}
-	p.Payments = append(p.Payments[:position], p.Payments[position+1:]...)
-	return nil
-}
-
 func (p *PaymentRepository) Close() error {
 	return nil
 }

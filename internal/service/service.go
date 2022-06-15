@@ -138,7 +138,8 @@ func (s *Service) DenyPayment(id int) error {
 	if payment.Status == models.Success || payment.Status == models.Failure {
 		return errors.New("this payment could not be denied")
 	}
-	err = s.storage.Payment().DeletePaymentById(id)
+	payment.Status = "DENIED"
+	err = s.storage.Payment().UpdatePaymentStatus(payment)
 	if err != nil {
 		return errors.New("error occurred during denying this payment")
 	}

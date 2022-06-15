@@ -82,12 +82,6 @@ func (p *PgPaymentRepository) GetPaymentsByUserEmail(email string) ([]models.Pay
 	return payments, nil
 }
 
-func (p *PgPaymentRepository) DeletePaymentById(id int) error {
-	query := "DELETE FROM payments WHERE id=$1"
-	_, err := p.db.Exec(query, id)
-	return err
-}
-
 func (p *PgPaymentRepository) Close() error {
 	return p.db.Close()
 }

@@ -174,7 +174,7 @@ func (a *App) paymentsByEmailHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary      Deny payment if it is possible
-// @Description  Deny payment if it exists and its status equals NEW or ERROR.
+// @Description  Deny payment if it exists and its status equals NEW or ERROR and sets DENIED status.
 // @Tags         Payments
 // @Accept       json
 // @Produce      json
