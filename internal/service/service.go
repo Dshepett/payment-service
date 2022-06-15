@@ -139,6 +139,7 @@ func (s *Service) DenyPayment(id int) error {
 		return errors.New("this payment could not be denied")
 	}
 	payment.Status = "DENIED"
+	payment.UpdatedAt = time.Now()
 	err = s.storage.Payment().UpdatePaymentStatus(payment)
 	if err != nil {
 		return errors.New("error occurred during denying this payment")
